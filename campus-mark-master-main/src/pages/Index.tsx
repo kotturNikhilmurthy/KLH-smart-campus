@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { ArrowRight, Calendar, Search, Bell, Users, GraduationCap, Shield } from
 
 const Index = () => {
   const navigate = useNavigate();
+  const [isSignInVisible, setIsSignInVisible] = useState(false);
 
   const features = [
     {
@@ -55,22 +57,30 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={() => navigate("/auth")}
+              <Button
+                size="lg"
+                onClick={() => {
+                  if (isSignInVisible) {
+                    navigate("/auth");
+                  } else {
+                    setIsSignInVisible(true);
+                  }
+                }}
                 className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto shadow-xl"
               >
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => navigate("/auth")}
-                className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto"
-              >
-                Sign In
-              </Button>
+              {isSignInVisible && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/auth")}
+                  className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto"
+                >
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         </div>

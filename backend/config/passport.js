@@ -3,6 +3,20 @@ import User from "../models/User.js";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
 
+const parseDomainList = (value, fallback) =>
+  value
+    ? value
+        .split(",")
+        .map((entry) => entry.trim().toLowerCase())
+        .filter(Boolean)
+    : fallback;
+
+const isEmailFromAllowedDomain = (email, allowedDomains) =>
+  allowedDomains?.some((domain) => email.endsWith(domain)) ?? false;
+
+const STUDENT_DOMAINS = parseDomainList(process.env.ALLOWED_STUDENT_DOMAINS, ["@klh.edu.in"]);
+const STAFF_DOMAINS = parseDomainList(process.env.ALLOWED_STAFF_DOMAINS, []);
+
 /**
  * Registers Google OAuth strategies for both student and teacher login flows.
  */
@@ -29,6 +43,7 @@ const configurePassport = (passport) => {
         try {
           const state = typeof req.query.state === "string" ? req.query.state.toLowerCase() : "";
           const requestedRole = state === "teacher" ? "teacher" : state === "admin" ? "admin" : "student";
+          const isStaffRole = requestedRole === "teacher" || requestedRole === "admin";
           const email = profile.emails?.[0]?.value?.toLowerCase();
           const name = profile.displayName || "Unnamed User";
           const profilePic = profile.photos?.[0]?.value || "";
@@ -37,7 +52,11 @@ const configurePassport = (passport) => {
             return done(null, false, { message: "Unable to read Google account email" });
           }
 
-          if (requestedRole === "student" && !email.endsWith("@klh.edu.in")) {
+          if (requestedRole === "student" && !isEmailFromAllowedDomain(email, STUDENT_DOMAINS)) {
+            return done(null, false, { message: "Invalid domain" });
+          }
+
+          if (isStaffRole && STAFF_DOMAINS.length && !isEmailFromAllowedDomain(email, STAFF_DOMAINS)) {
             return done(null, false, { message: "Invalid domain" });
           }
 
