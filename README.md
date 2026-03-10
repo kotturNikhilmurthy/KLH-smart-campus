@@ -1,5 +1,4 @@
 🏫 Smart Campus Ecosystem
-
 Smart Campus Ecosystem is a full-stack web application designed to simplify campus activities and improve communication between students, faculty, and administrators.
 
 🚀 Features
